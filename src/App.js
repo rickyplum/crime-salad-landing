@@ -196,7 +196,7 @@ export default function App() {
             <div className="mt-8 grid grid-cols-2 sm:grid-cols-4 gap-4 text-center text-sm">
               {[
                 ["300+", "Victim Focused Episodes"],
-                ["Top 0.1%", "of Podcasts"],
+                ["Top 0.05%", "of Podcasts"],
                 ["Weekly", "New Episodes"],
                 ["Since 2019", "Trusted Stories"],
               ].map(([num, label]) => (
