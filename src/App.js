@@ -1,6 +1,7 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 
 // Crime Salad — Clean, Fancy + Spotify Embed + Press Marquee + Flickering Art (CRA + Tailwind)
+// Paste this whole file into src/App.js
 
 const LINKS = {
   APPLE: "https://podcasts.apple.com/us/podcast/crime-salad/id1457141569",
@@ -14,11 +15,11 @@ const LINKS = {
 
 // Inline image data URI. Leave empty to use /hosts-banner.jpg from public/
 const HOSTS_BANNER = "";
-const HOSTS_PUBLIC = `${process.env.PUBLIC_URL || ""}/hosts-banner.jpg`;
-const HOSTS_PUBLIC_ALT = `${process.env.PUBLIC_URL || ""}/hosts.jpg`;
+const HOSTS_PUBLIC = `${process.env.PUBLIC_URL || ''}/hosts-banner.jpg`;
+const HOSTS_PUBLIC_ALT = `${process.env.PUBLIC_URL || ''}/hosts.jpg`;
+
 
 const CONTACT_EMAIL = "crimesaladpodcast@gmail.com";
-
 function SpotifyPlayer({ showId, episodeId }) {
   const src = `https://open.spotify.com/embed/${episodeId ? `episode/${episodeId}` : `show/${showId}`}?utm_source=generator&theme=0`;
   return (
@@ -35,7 +36,167 @@ function SpotifyPlayer({ showId, episodeId }) {
   );
 }
 
+
+// --- Shopify Collection (client-side; uses Storefront API if token present) ---
+function ShopifyCollection({ shopDomain, storefrontAccessToken, collectionId, limit = 12 }) {
+  const [products, setProducts] = useState(null);
+  const [err, setErr] = useState(null);
+  const id = String(collectionId || "");
+  const gid = id.startsWith("gid://") ? id : `gid://shopify/Collection/${id}`;
+
+  useEffect(() => {
+    let active = true;
+    async function run() {
+      if (!storefrontAccessToken) { return; }
+      try {
+        const res = await fetch(`https://${shopDomain}/api/2024-07/graphql.json`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Shopify-Storefront-Access-Token': storefrontAccessToken,
+          },
+          body: JSON.stringify({
+            query: `
+              query CollectionProducts($id: ID!, $first: Int!) {
+                collection(id: $id) {
+                  title
+                  products(first: $first) {
+                    edges {
+                      node {
+                        id
+                        title
+                        handle
+                        featuredImage { url altText }
+                        priceRange { minVariantPrice { amount currencyCode } }
+                      }
+                    }
+                  }
+                }
+              }
+            `,
+            variables: { id: gid, first: limit },
+          })
+        });
+        const json = await res.json();
+        if (!active) return;
+        if (json.errors) throw new Error(json.errors[0]?.message || 'Storefront API error');
+        const edges = json.data?.collection?.products?.edges ?? [];
+        setProducts(edges.map(e => e.node));
+      } catch (e) {
+        if (active) setErr(e);
+      }
+    }
+    run();
+    return () => { active = false; };
+  }, [shopDomain, storefrontAccessToken, gid, limit]);
+
+  // Fallback if no token: simple button to shop
+  if (!storefrontAccessToken) {
+    return (
+      <div className="text-center">
+        <a
+          href={`https://${shopDomain}/collections/all`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-2 rounded-xl bg-white text-zinc-900 px-5 py-3 text-sm font-semibold hover:bg-zinc-200"
+        >
+          Browse the shop
+        </a>
+        <p className="mt-2 text-xs text-zinc-500">Add REACT_APP_SHOPIFY_STOREFRONT_TOKEN to enable in-page products.</p>
+      </div>
+    );
+  }
+
+  if (err) {
+    return <p className="text-sm text-rose-400">Couldn't load products. {String(err.message || err)}</p>;
+  }
+
+  if (!products) {
+    return (
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+        {Array.from({ length: 8 }).map((_, i) => (
+          <div key={i} className="rounded-2xl border border-white/10 bg-white/5 p-3 animate-pulse h-56" />
+        ))}
+      </div>
+    );
+  }
+
+  if (!products.length) {
+    return <p className="text-zinc-400">No products found.</p>;
+  }
+
+  return (
+    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-5">
+      {products.map(p => {
+        const img = p.featuredImage?.url;
+        const alt = p.featuredImage?.altText || p.title;
+        const price = p.priceRange?.minVariantPrice?.amount
+          ? `${p.priceRange.minVariantPrice.amount} ${p.priceRange.minVariantPrice.currencyCode}`
+          : '';
+        const href = `https://${shopDomain}/products/${p.handle}`;
+        return (
+          <a
+            key={p.id}
+            href={href}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="group rounded-2xl border border-white/10 bg-white/5 overflow-hidden hover:bg-white/10"
+          >
+            <div className="aspect-square overflow-hidden">
+              {img ? (
+                <img
+                  src={img}
+                  alt={alt}
+                  className="h-full w-full object-cover transition scale-100 group-hover:scale-[1.03]"
+                />
+              ) : (
+                <div className="h-full w-full bg-zinc-800" />
+              )}
+            </div>
+            <div className="p-3">
+              <div className="font-semibold leading-tight">{p.title}</div>
+              {price && <div className="text-sm text-zinc-400 mt-1">{price}</div>}
+            </div>
+          </a>
+        );
+      })}
+    </div>
+  );
+}
+
 export default function App() {
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName]   = useState('');
+  const [email, setEmail]         = useState('');
+  const [loading, setLoading]     = useState(false);
+  const [message, setMessage]     = useState(null);
+
+  async function handleJoin(e) {
+    e.preventDefault();
+    if (!email || !/@/.test(email)) {
+      setMessage({ type: 'error', text: 'Please enter a valid email.' });
+      return;
+    }
+    setLoading(true);
+    setMessage(null);
+
+    try {
+      const subject = 'Join the List signup';
+      const body = `Please add me to the list. Name: ${firstName} ${lastName} Email: ${email}`;
+      const mailto = `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+
+      // Trigger the user's email client
+      window.location.href = mailto;
+
+      setMessage({ type: 'success', text: 'Opening your email app… if nothing opens, email us directly at ' + CONTACT_EMAIL + '.' });
+      setFirstName(''); setLastName(''); setEmail('');
+    } catch (err) {
+      setMessage({ type: 'error', text: 'Could not open your mail app. Please email us directly at ' + CONTACT_EMAIL + '.' });
+    } finally {
+      setLoading(false);
+    }
+  }
+
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100 selection:bg-fuchsia-400/30">
       {/* ===== Background Orbs / Glow ===== */}
@@ -55,7 +216,9 @@ export default function App() {
 
           {/* Center: Nav */}
           <nav className="hidden md:flex justify-center items-center gap-8 text-sm text-zinc-300">
+            {/* Removed Listen */}
             <a href="#join-the-list" className="hover:text-white">Join the List</a>
+            <a href="#shop" className="hover:text-white">Shop</a>
             <a href={"mailto:" + CONTACT_EMAIL} className="hover:text-white">Contact</a>
           </nav>
 
@@ -79,7 +242,7 @@ export default function App() {
         </div>
       </header>
 
-      {/* ===== Global styles ===== */}
+      {/* ===== Global styles for flicker/glint + hero line fade ===== */}
       <style>{`
         @keyframes flicker {
           0%{opacity:.9;filter:brightness(1.05)}2%{opacity:.15;filter:brightness(.9)}
@@ -110,9 +273,9 @@ export default function App() {
           <div>
             <p className="text-xs uppercase tracking-[0.22em] text-zinc-400">True Crime Podcast</p>
             <h1 className="mt-3 text-4xl sm:text-5xl md:text-6xl font-extrabold leading-[1.1]">
-              <span className="bg-gradient-to-r from-fuchsia-300 via-violet-200 to-cyan-200 bg-clip-text text-transparent block fade-line mb-1.5 sm:mb-2 last:mb-0" style={{ animationDelay: "0s" }}>Bite sized.</span>
-              <span className="bg-gradient-to-r from-fuchsia-300 via-violet-200 to-cyan-200 bg-clip-text text-transparent block fade-line mb-1.5 sm:mb-2 last:mb-0" style={{ animationDelay: ".12s" }}>True Crime.</span>
-              <span className="bg-gradient-to-r from-fuchsia-300 via-violet-200 to-cyan-200 bg-clip-text text-transparent block fade-line mb-1.5 sm:mb-2 last:mb-0" style={{ animationDelay: ".24s" }}>Weekly.</span>
+              <span className="bg-gradient-to-r from-fuchsia-300 via-violet-200 to-cyan-200 bg-clip-text text-transparent block fade-line mb-1.5 sm:mb-2 last:mb-0" style={{animationDelay:'0s'}}>Bite sized.</span>
+              <span className="bg-gradient-to-r from-fuchsia-300 via-violet-200 to-cyan-200 bg-clip-text text-transparent block fade-line mb-1.5 sm:mb-2 last:mb-0" style={{animationDelay:'.12s'}}>True Crime.</span>
+              <span className="bg-gradient-to-r from-fuchsia-300 via-violet-200 to-cyan-200 bg-clip-text text-transparent block fade-line mb-1.5 sm:mb-2 last:mb-0" style={{animationDelay:'.24s'}}>Weekly.</span>
             </h1>
             <p className="mt-4 text-lg text-zinc-300 max-w-xl">
               Real cases told with empathy and rigor — hosted by Ashley and Ricky.
@@ -120,7 +283,10 @@ export default function App() {
 
             {/* Listen CTAs */}
             <div id="listen" className="mt-7 flex flex-wrap gap-3">
-              <a className="group inline-flex items-center gap-2 rounded-xl bg-white text-zinc-900 px-4 py-2 font-medium shadow hover:bg-zinc-200 focus:outline-none focus:ring-2 focus:ring-white/30" href={LINKS?.SPOTIFY ?? "#"}>
+              <a
+                className="group inline-flex items-center gap-2 rounded-xl bg-white text-zinc-900 px-4 py-2 font-medium shadow hover:bg-zinc-200 focus:outline-none focus:ring-2 focus:ring-white/30"
+                href={LINKS?.SPOTIFY ?? "#"}
+              >
                 <svg viewBox="0 0 24 24" className="h-4 w-4" fill="currentColor"><path d="M12 1.5A10.5 10.5 0 1 0 22.5 12 10.512 10.512 0 0 0 12 1.5Zm4.58 15.16a.75.75 0 0 1-1.04.22 9.7 9.7 0 0 0-7.58-.9.75.75 0 0 1-.42-1.44 11.2 11.2 0 0 1 8.76 1.02.75.75 0 0 1 .28 1.1Zm1.4-3.07a.94.94 0 0 1-1.3.32 11.86 11.86 0 0 0-9.36-1.25.93.93 0 0 1-.46-1.81 13.73 13.73 0 0 1 10.86 1.45.93.93 0 0 1 .26 1.29Zm.14-3a1.11 1.11 0 0 1-1.55.39 14.86 14.86 0 0 0-11.73-1.5 1.11 1.11 0 0 1-.65-2.12 17.06 17.06 0 0 1 13.45 1.72 1.12 1.12 0 0 1 .48 1.51Z"/></svg>
                 Listen on Spotify
               </a>
@@ -151,7 +317,7 @@ export default function App() {
                   <rect x="3" y="3" width="4" height="18" rx="1.2" />
                   <circle cx="16" cy="10" r="6" />
                 </svg>
-                Ad-Free on Patreon
+                Ad‑Free on Patreon
               </a>
             </div>
 
@@ -159,7 +325,7 @@ export default function App() {
             <div className="mt-8 grid grid-cols-2 sm:grid-cols-4 gap-4 text-center text-sm">
               {[
                 ["300+", "Victim Focused Episodes"],
-                ["Top 0.05%", "of Podcasts"],
+                ["Top 0.1%", "of Podcasts"],
                 ["Weekly", "New Episodes"],
                 ["Since 2019", "Trusted Stories"],
               ].map(([num, label]) => (
@@ -171,7 +337,7 @@ export default function App() {
             </div>
           </div>
 
-          {/* Artwork Card */}
+          {/* Artwork Card with Flicker/Glint */}
           <div>
             <div className="relative mx-auto w-full max-w-md">
               <div className="absolute -inset-6 rounded-[2rem] bg-gradient-to-br from-fuchsia-400/20 via-indigo-400/20 to-cyan-300/20 blur-2xl" />
@@ -182,6 +348,7 @@ export default function App() {
                     alt="Crime Salad Artwork"
                     className="h-full w-full object-cover object-center"
                   />
+                  {/* Flicker overlay */}
                   <div
                     className="pointer-events-none absolute inset-0 rounded-xl cs-flicker"
                     style={{
@@ -191,6 +358,7 @@ export default function App() {
                       opacity: 0.9,
                     }}
                   />
+                  {/* Moving glint */}
                   <div className="pointer-events-none absolute -inset-6 overflow-hidden">
                     <div
                       className="cs-glint absolute top-0 left-0 h-[200%] w-[35%]"
@@ -237,16 +405,13 @@ export default function App() {
                   style={{ filter: "contrast(1.08) saturate(1.1)" }}
                   onError={(e) => {
                     const el = e.currentTarget;
-                    if (!el.dataset.fallbackTried) {
-                      el.dataset.fallbackTried = "1";
-                      el.src = HOSTS_PUBLIC_ALT;
-                      return;
-                    }
-                    el.onerror = null;
-                    el.src = "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=1600&auto=format&fit=crop";
+                    if (!el.dataset.fallbackTried) { el.dataset.fallbackTried = '1'; el.src = HOSTS_PUBLIC_ALT; return; }
+                    el.onerror = null; el.src = "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=1600&auto=format&fit=crop";
                   }}
                 />
+                {/* Edge glow (keeps subjects crisp) */}
                 <div className="edge-fringe absolute inset-0 rounded-3xl" />
+                {/* Subtle scanlines */}
                 <div className="scanlines absolute inset-0" />
                 <div className="absolute inset-0 bg-gradient-to-tr from-fuchsia-500/20 via-indigo-500/15 to-cyan-400/20 mix-blend-soft-light" />
                 <div className="pointer-events-none absolute inset-0 shadow-[inset_0_-120px_200px_rgba(0,0,0,0.45)]" />
@@ -254,67 +419,67 @@ export default function App() {
             </div>
           </div>
         </div>
-      </section>
+      </section><section id="join-the-list" className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pb-20">
+  <div className="p-[1px] rounded-3xl bg-gradient-to-br from-fuchsia-400/30 via-indigo-400/20 to-cyan-300/20">
+    <div className="rounded-3xl bg-zinc-950/70 p-8 md:p-12 border border-white/10">
+      <h3 className="text-2xl sm:text-3xl font-bold text-center">Join the List</h3>
+      <p className="mt-2 text-zinc-300 max-w-xl mx-auto text-center">No spam. Just new episodes, behind‑the‑scenes, and ways to support families and advocacy.</p>
 
-      {/* ===== Join the List (Mailchimp) ===== */}
-      <section id="join-the-list" className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pb-20">
-        <div className="mx-auto max-w-3xl text-center py-10 md:py-14">
-          <h3 className="text-3xl md:text-4xl font-extrabold tracking-[0.12em] uppercase">Join the List</h3>
-          <p className="mt-3 text-zinc-300">Sign up for updates on the investigation and bonus content.</p>
+      <form
+        className="mt-6 mx-auto grid w-full max-w-xl grid-cols-1 gap-3 sm:grid-cols-[1fr_1fr_auto]"
+        action="https://crimesaladpodcast.us1.list-manage.com/subscribe/post?u=cc67224c1a30078239b64e0d3&id=466ab65f6a&f_id=00c2c3e1f0"
+        method="post"
+        target="_blank"
+        noValidate
+      >
+        <label className="sr-only" htmlFor="mce-FNAME">First name</label>
+        <input
+          type="text"
+          name="FNAME"
+          id="mce-FNAME"
+          placeholder="First name (optional)"
+          className="rounded-xl border border-white/10 bg-zinc-900/80 px-4 py-3 text-sm placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-white/20"
+        />
 
-          <form
-            action="https://crimesaladpodcast.us1.list-manage.com/subscribe/post?u=cc67224c1a30078239b64e0d3&id=466ab65f6a&f_id=00c2c3e1f0"
-            method="post"
-            target="_blank"
-            noValidate
-            className="mt-8 space-y-4 max-w-md mx-auto"
-          >
-            <label htmlFor="mce-EMAIL" className="sr-only">Email Address</label>
-            <input
-              type="email"
-              name="EMAIL"
-              id="mce-EMAIL"
-              required
-              placeholder="Email Address"
-              className="w-full rounded-md border border-white/15 bg-transparent px-4 py-3 text-base placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-white/20"
-            />
+        <label className="sr-only" htmlFor="mce-EMAIL">Email address</label>
+        <input
+          type="email"
+          name="EMAIL"
+          id="mce-EMAIL"
+          required
+          placeholder="Email address"
+          className="rounded-xl border border-white/10 bg-zinc-900/80 px-4 py-3 text-sm placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-white/20"
+        />
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <input
-                type="text"
-                name="FNAME"
-                id="mce-FNAME"
-                placeholder="First Name (optional)"
-                className="w-full rounded-md border border-white/15 bg-transparent px-4 py-3 text-base placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-white/20"
-              />
-              <input
-                type="text"
-                name="LNAME"
-                id="mce-LNAME"
-                placeholder="Last Name (optional)"
-                className="w-full rounded-md border border-white/15 bg-transparent px-4 py-3 text-base placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-white/20"
-              />
-            </div>
-
-            {/* Honeypot */}
-            <div style={{ position: "absolute", left: "-5000px" }} aria-hidden="true">
-              <input type="text" name="b_cc67224c1a30078239b64e0d3_466ab65f6a" tabIndex={-1} defaultValue="" />
-            </div>
-
-            <button
-              type="submit"
-              name="subscribe"
-              id="mc-embedded-subscribe"
-              className="mx-auto inline-flex items-center justify-center rounded-full border-2 border-white bg-white px-8 py-3 font-semibold text-zinc-900 hover:bg-zinc-100 focus:outline-none focus:ring-2 focus:ring-white/30"
-            >
-              Join the List
-            </button>
-
-            <p className="text-xs text-zinc-500">We’ll never spam. Unsubscribe anytime.</p>
-          </form>
+        <div className="sm:col-span-1">
+          <button type="submit" name="subscribe" className="rounded-xl bg-white text-zinc-900 px-5 py-3 text-sm font-semibold hover:bg-zinc-200 transition w-full sm:w-auto">
+            Join the List
+          </button>
         </div>
+
+        {/* Mailchimp honeypot (required) */}
+        <div aria-hidden="true" style={{ position: 'absolute', left: '-5000px' }}>
+          <input type="text" name="b_cc67224c1a30078239b64e0d3_466ab65f6a" tabIndex={-1} defaultValue="" />
+        </div>
+      </form>
+
+      <p className="mt-3 text-xs text-zinc-400 text-center">By subscribing you agree to our terms. Unsubscribe anytime.</p>
+    </div>
+  </div>
+</section>
+      {/* ===== Shop ===== */}
+      <section id="shop" className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16">
+        <h3 className="text-2xl sm:text-3xl font-bold mb-6">Shop</h3>
+        <p className="text-zinc-300 mb-8">Official Crime Salad merch.</p>
+
+        <ShopifyCollection
+          shopDomain="crimesaladpodcast.myshopify.com"
+          storefrontAccessToken={process.env.REACT_APP_SHOPIFY_STOREFRONT_TOKEN || "899809aa74e2ecbe671f60a376ef7932"}
+          collectionId="gid://shopify/Collection/499090194713"
+        />
       </section>
 
+      {/* ===== Footer ===== */}
       {/* ===== Contact ===== */}
       <section id="contact" className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pb-20">
         <div className="p-[1px] rounded-3xl bg-gradient-to-br from-fuchsia-400/30 via-indigo-400/20 to-cyan-300/20">
@@ -326,11 +491,7 @@ export default function App() {
                 <svg viewBox="0 0 24 24" className="h-4 w-4" fill="currentColor" aria-hidden="true"><path d="M2 5.5A2.5 2.5 0 0 1 4.5 3h15A2.5 2.5 0 0 1 22 5.5v13a2.5 2.5 0 0 1-2.5 2.5h-15A2.5 2.5 0 0 1 2 18.5v-13Zm2.4-.5 7.6 5.4L19.6 5H4.4Zm15.1 2.2-6.8 4.9a1.5 1.5 0 0 1-1.8 0L4.1 7.2V18.5c0 .28.22.5.5.5h15a.5.5 0 0 0 .5-.5V7.2Z"/></svg>
                 Email {CONTACT_EMAIL}
               </a>
-              <button
-                type="button"
-                onClick={() => navigator.clipboard && navigator.clipboard.writeText(CONTACT_EMAIL)}
-                className="inline-flex items-center gap-2 rounded-xl border border-white/15 bg-white/5 px-5 py-3 text-sm font-semibold hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/20"
-              >
+              <button type="button" onClick={() => navigator.clipboard && navigator.clipboard.writeText(CONTACT_EMAIL)} className="inline-flex items-center gap-2 rounded-xl border border-white/15 bg-white/5 px-5 py-3 text-sm font-semibold hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/20">
                 Copy email
               </button>
             </div>
@@ -338,7 +499,6 @@ export default function App() {
         </div>
       </section>
 
-      {/* ===== Footer ===== */}
       <footer className="border-t border-white/10">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 grid md:grid-cols-4 gap-10 text-sm">
           <div className="md:col-span-2">
