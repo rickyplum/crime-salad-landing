@@ -14,10 +14,9 @@ const LINKS = {
 };
 
 // Inline image data URI. Leave empty to use /hosts-banner.jpg from public/
-// Inline image data URI. Leave empty to use /hosts-banner.jpg from public/
 const HOSTS_BANNER = "";
 const HOSTS_PUBLIC = `${process.env.PUBLIC_URL || ''}/hosts-banner.jpg`;
-const HOSTS_PUBLIC_ALT = `${process.env.PUBLIC_URL || ''}/hosts.jpg`;   // <— add this
+const HOSTS_PUBLIC_ALT = `${process.env.PUBLIC_URL || ''}/hosts.jpg`;
 const PLACEHOLDER = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600"><rect width="100%" height="100%" fill="%2318181b"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="%23a1a1aa" font-family="Arial, Helvetica, sans-serif" font-size="24">Image unavailable</text></svg>';
 const CONTACT_EMAIL = "crimesaladpodcast@gmail.com";
 function SpotifyPlayer({ showId, episodeId }) {
@@ -167,33 +166,44 @@ function ShopifyCollection({ shopDomain, storefrontAccessToken, collectionId, li
 }
 
 export default function App() {
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName]   = useState('');
-  const [email, setEmail]         = useState('');
-  const [loading, setLoading]     = useState(false);
-  const [message, setMessage]     = useState(null);
+  // state for the form
+  const [firstName, setFirstName] = useState("");
+  const [lastName,  setLastName]  = useState("");
+  const [email,     setEmail]     = useState("");
+  const [loading,   setLoading]   = useState(false);
+  const [message,   setMessage]   = useState(null);
 
-  async function handleJoin(e) {
+  // mailto submit handler
+  function handleJoin(e) {
     e.preventDefault();
     if (!email || !/@/.test(email)) {
-      setMessage({ type: 'error', text: 'Please enter a valid email.' });
+      setMessage({ type: "error", text: "Please enter a valid email." });
       return;
     }
+
     setLoading(true);
     setMessage(null);
 
     try {
-      const subject = 'Join the List signup';
+      const subject = "Join the List signup";
       const body = `Please add me to the list. Name: ${firstName} ${lastName} Email: ${email}`;
       const mailto = `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 
       // Trigger the user's email client
       window.location.href = mailto;
 
-      setMessage({ type: 'success', text: 'Opening your email app… if nothing opens, email us directly at ' + CONTACT_EMAIL + '.' });
-      setFirstName(''); setLastName(''); setEmail('');
+      setMessage({
+        type: "success",
+        text: `Opening your email app… if nothing opens, email us directly at ${CONTACT_EMAIL}.`,
+      });
+      setFirstName("");
+      setLastName("");
+      setEmail("");
     } catch (err) {
-      setMessage({ type: 'error', text: 'Could not open your mail app. Please email us directly at ' + CONTACT_EMAIL + '.' });
+      setMessage({
+        type: "error",
+        text: `Could not open your mail app. Please email us directly at ${CONTACT_EMAIL}.`,
+      });
     } finally {
       setLoading(false);
     }
