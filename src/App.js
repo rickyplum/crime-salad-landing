@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 
 // Crime Salad — Clean, Fancy + Spotify Embed + Press Marquee + Flickering Art (CRA + Tailwind)
 // Paste this whole file into src/App.js
@@ -37,6 +37,38 @@ function SpotifyPlayer({ showId, episodeId }) {
 }
 
 export default function App() {
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName]   = useState('');
+  const [email, setEmail]         = useState('');
+  const [loading, setLoading]     = useState(false);
+  const [message, setMessage]     = useState(null);
+
+  async function handleJoin(e) {
+    e.preventDefault();
+    if (!email || !/@/.test(email)) {
+      setMessage({ type: 'error', text: 'Please enter a valid email.' });
+      return;
+    }
+    setLoading(true);
+    setMessage(null);
+
+    try {
+      const subject = 'Join the List signup';
+      const body = `Please add me to the list. Name: ${firstName} ${lastName} Email: ${email}`;
+      const mailto = `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+
+      // Trigger the user's email client
+      window.location.href = mailto;
+
+      setMessage({ type: 'success', text: 'Opening your email app… if nothing opens, email us directly at ' + CONTACT_EMAIL + '.' });
+      setFirstName(''); setLastName(''); setEmail('');
+    } catch (err) {
+      setMessage({ type: 'error', text: 'Could not open your mail app. Please email us directly at ' + CONTACT_EMAIL + '.' });
+    } finally {
+      setLoading(false);
+    }
+  }
+
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100 selection:bg-fuchsia-400/30">
       {/* ===== Background Orbs / Glow ===== */}
@@ -164,7 +196,7 @@ export default function App() {
             <div className="mt-8 grid grid-cols-2 sm:grid-cols-4 gap-4 text-center text-sm">
               {[
                 ["300+", "Victim Focused Episodes"],
-                ["Top 20", "True Crime Apple Podcasts"],
+                ["Top 0.1%", "of Podcasts"],
                 ["Weekly", "New Episodes"],
                 ["Since 2019", "Trusted Stories"],
               ].map(([num, label]) => (
@@ -263,11 +295,15 @@ export default function App() {
           <h3 className="text-3xl md:text-4xl font-extrabold tracking-[0.12em] uppercase">Join the List</h3>
           <p className="mt-3 text-zinc-300">Sign up for updates on the investigation and bonus content.</p>
 
-          <form className="mt-8 space-y-4 max-w-md mx-auto" onSubmit={(e)=>e.preventDefault()}>
-            <input type="text" placeholder="First Name" className="w-full rounded-md border border-white/15 bg-transparent px-4 py-3 text-base placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-white/20" />
-            <input type="text" placeholder="Last Name" className="w-full rounded-md border border-white/15 bg-transparent px-4 py-3 text-base placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-white/20" />
-            <input type="email" placeholder="Email Address" className="w-full rounded-md border border-white/15 bg-transparent px-4 py-3 text-base placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-white/20" />
-            <button type="submit" className="mx-auto inline-flex items-center justify-center rounded-full border-2 border-white bg-white px-8 py-3 font-semibold text-zinc-900 hover:bg-zinc-100 focus:outline-none focus:ring-2 focus:ring-white/30">Sign Up</button>
+          <form className="mt-8 space-y-4 max-w-md mx-auto" onSubmit={handleJoin}>
+            <input type="text" placeholder="First Name" className="w-full rounded-md border border-white/15 bg-transparent px-4 py-3 text-base placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-white/20" value={firstName} onChange={(e)=>setFirstName(e.target.value)} />
+            <input type="text" placeholder="Last Name" className="w-full rounded-md border border-white/15 bg-transparent px-4 py-3 text-base placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-white/20" value={lastName} onChange={(e)=>setLastName(e.target.value)} />
+            <input type="email" placeholder="Email Address" className="w-full rounded-md border border-white/15 bg-transparent px-4 py-3 text-base placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-white/20" value={email} onChange={(e)=>setEmail(e.target.value)} required />
+            <button type="submit" disabled={loading} className="mx-auto inline-flex items-center justify-center rounded-full border-2 border-white bg-white px-8 py-3 font-semibold text-zinc-900 hover:bg-zinc-100 focus:outline-none focus:ring-2 focus:ring-white/30 disabled:opacity-60 disabled:cursor-not-allowed">{loading ? 'Joining…' : 'Sign Up'}</button>
+            {message && (
+              <p className={`text-sm ${message.type==='success' ? 'text-emerald-400' : 'text-rose-400'}`}>{message.text}</p>
+            )}
+            <p className="text-xs text-zinc-500">We’ll never spam. Unsubscribe anytime.</p>
           </form>
         </div>
       </section>
