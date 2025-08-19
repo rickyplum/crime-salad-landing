@@ -1,7 +1,6 @@
-import React, { useState } from "react";
+import React from "react";
 
 // Crime Salad — Clean, Fancy + Spotify Embed + Press Marquee + Flickering Art (CRA + Tailwind)
-// Paste this whole file into src/App.js
 
 const LINKS = {
   APPLE: "https://podcasts.apple.com/us/podcast/crime-salad/id1457141569",
@@ -15,11 +14,11 @@ const LINKS = {
 
 // Inline image data URI. Leave empty to use /hosts-banner.jpg from public/
 const HOSTS_BANNER = "";
-const HOSTS_PUBLIC = `${process.env.PUBLIC_URL || ''}/hosts-banner.jpg`;
-const HOSTS_PUBLIC_ALT = `${process.env.PUBLIC_URL || ''}/hosts.jpg`;
-
+const HOSTS_PUBLIC = `${process.env.PUBLIC_URL || ""}/hosts-banner.jpg`;
+const HOSTS_PUBLIC_ALT = `${process.env.PUBLIC_URL || ""}/hosts.jpg`;
 
 const CONTACT_EMAIL = "crimesaladpodcast@gmail.com";
+
 function SpotifyPlayer({ showId, episodeId }) {
   const src = `https://open.spotify.com/embed/${episodeId ? `episode/${episodeId}` : `show/${showId}`}?utm_source=generator&theme=0`;
   return (
@@ -37,38 +36,6 @@ function SpotifyPlayer({ showId, episodeId }) {
 }
 
 export default function App() {
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName]   = useState('');
-  const [email, setEmail]         = useState('');
-  const [loading, setLoading]     = useState(false);
-  const [message, setMessage]     = useState(null);
-
-  async function handleJoin(e) {
-    e.preventDefault();
-    if (!email || !/@/.test(email)) {
-      setMessage({ type: 'error', text: 'Please enter a valid email.' });
-      return;
-    }
-    setLoading(true);
-    setMessage(null);
-
-    try {
-      const subject = 'Join the List signup';
-      const body = `Please add me to the list. Name: ${firstName} ${lastName} Email: ${email}`;
-      const mailto = `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-
-      // Trigger the user's email client
-      window.location.href = mailto;
-
-      setMessage({ type: 'success', text: 'Opening your email app… if nothing opens, email us directly at ' + CONTACT_EMAIL + '.' });
-      setFirstName(''); setLastName(''); setEmail('');
-    } catch (err) {
-      setMessage({ type: 'error', text: 'Could not open your mail app. Please email us directly at ' + CONTACT_EMAIL + '.' });
-    } finally {
-      setLoading(false);
-    }
-  }
-
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100 selection:bg-fuchsia-400/30">
       {/* ===== Background Orbs / Glow ===== */}
@@ -88,7 +55,6 @@ export default function App() {
 
           {/* Center: Nav */}
           <nav className="hidden md:flex justify-center items-center gap-8 text-sm text-zinc-300">
-            {/* Removed Listen */}
             <a href="#join-the-list" className="hover:text-white">Join the List</a>
             <a href={"mailto:" + CONTACT_EMAIL} className="hover:text-white">Contact</a>
           </nav>
@@ -113,7 +79,7 @@ export default function App() {
         </div>
       </header>
 
-      {/* ===== Global styles for flicker/glint + hero line fade ===== */}
+      {/* ===== Global styles ===== */}
       <style>{`
         @keyframes flicker {
           0%{opacity:.9;filter:brightness(1.05)}2%{opacity:.15;filter:brightness(.9)}
@@ -144,9 +110,9 @@ export default function App() {
           <div>
             <p className="text-xs uppercase tracking-[0.22em] text-zinc-400">True Crime Podcast</p>
             <h1 className="mt-3 text-4xl sm:text-5xl md:text-6xl font-extrabold leading-[1.1]">
-              <span className="bg-gradient-to-r from-fuchsia-300 via-violet-200 to-cyan-200 bg-clip-text text-transparent block fade-line mb-1.5 sm:mb-2 last:mb-0" style={{animationDelay:'0s'}}>Bite sized.</span>
-              <span className="bg-gradient-to-r from-fuchsia-300 via-violet-200 to-cyan-200 bg-clip-text text-transparent block fade-line mb-1.5 sm:mb-2 last:mb-0" style={{animationDelay:'.12s'}}>True Crime.</span>
-              <span className="bg-gradient-to-r from-fuchsia-300 via-violet-200 to-cyan-200 bg-clip-text text-transparent block fade-line mb-1.5 sm:mb-2 last:mb-0" style={{animationDelay:'.24s'}}>Weekly.</span>
+              <span className="bg-gradient-to-r from-fuchsia-300 via-violet-200 to-cyan-200 bg-clip-text text-transparent block fade-line mb-1.5 sm:mb-2 last:mb-0" style={{ animationDelay: "0s" }}>Bite sized.</span>
+              <span className="bg-gradient-to-r from-fuchsia-300 via-violet-200 to-cyan-200 bg-clip-text text-transparent block fade-line mb-1.5 sm:mb-2 last:mb-0" style={{ animationDelay: ".12s" }}>True Crime.</span>
+              <span className="bg-gradient-to-r from-fuchsia-300 via-violet-200 to-cyan-200 bg-clip-text text-transparent block fade-line mb-1.5 sm:mb-2 last:mb-0" style={{ animationDelay: ".24s" }}>Weekly.</span>
             </h1>
             <p className="mt-4 text-lg text-zinc-300 max-w-xl">
               Real cases told with empathy and rigor — hosted by Ashley and Ricky.
@@ -154,10 +120,7 @@ export default function App() {
 
             {/* Listen CTAs */}
             <div id="listen" className="mt-7 flex flex-wrap gap-3">
-              <a
-                className="group inline-flex items-center gap-2 rounded-xl bg-white text-zinc-900 px-4 py-2 font-medium shadow hover:bg-zinc-200 focus:outline-none focus:ring-2 focus:ring-white/30"
-                href={LINKS?.SPOTIFY ?? "#"}
-              >
+              <a className="group inline-flex items-center gap-2 rounded-xl bg-white text-zinc-900 px-4 py-2 font-medium shadow hover:bg-zinc-200 focus:outline-none focus:ring-2 focus:ring-white/30" href={LINKS?.SPOTIFY ?? "#"}>
                 <svg viewBox="0 0 24 24" className="h-4 w-4" fill="currentColor"><path d="M12 1.5A10.5 10.5 0 1 0 22.5 12 10.512 10.512 0 0 0 12 1.5Zm4.58 15.16a.75.75 0 0 1-1.04.22 9.7 9.7 0 0 0-7.58-.9.75.75 0 0 1-.42-1.44 11.2 11.2 0 0 1 8.76 1.02.75.75 0 0 1 .28 1.1Zm1.4-3.07a.94.94 0 0 1-1.3.32 11.86 11.86 0 0 0-9.36-1.25.93.93 0 0 1-.46-1.81 13.73 13.73 0 0 1 10.86 1.45.93.93 0 0 1 .26 1.29Zm.14-3a1.11 1.11 0 0 1-1.55.39 14.86 14.86 0 0 0-11.73-1.5 1.11 1.11 0 0 1-.65-2.12 17.06 17.06 0 0 1 13.45 1.72 1.12 1.12 0 0 1 .48 1.51Z"/></svg>
                 Listen on Spotify
               </a>
@@ -188,7 +151,7 @@ export default function App() {
                   <rect x="3" y="3" width="4" height="18" rx="1.2" />
                   <circle cx="16" cy="10" r="6" />
                 </svg>
-                Ad‑Free on Patreon
+                Ad-Free on Patreon
               </a>
             </div>
 
@@ -208,7 +171,7 @@ export default function App() {
             </div>
           </div>
 
-          {/* Artwork Card with Flicker/Glint */}
+          {/* Artwork Card */}
           <div>
             <div className="relative mx-auto w-full max-w-md">
               <div className="absolute -inset-6 rounded-[2rem] bg-gradient-to-br from-fuchsia-400/20 via-indigo-400/20 to-cyan-300/20 blur-2xl" />
@@ -219,7 +182,6 @@ export default function App() {
                     alt="Crime Salad Artwork"
                     className="h-full w-full object-cover object-center"
                   />
-                  {/* Flicker overlay */}
                   <div
                     className="pointer-events-none absolute inset-0 rounded-xl cs-flicker"
                     style={{
@@ -229,7 +191,6 @@ export default function App() {
                       opacity: 0.9,
                     }}
                   />
-                  {/* Moving glint */}
                   <div className="pointer-events-none absolute -inset-6 overflow-hidden">
                     <div
                       className="cs-glint absolute top-0 left-0 h-[200%] w-[35%]"
@@ -276,13 +237,16 @@ export default function App() {
                   style={{ filter: "contrast(1.08) saturate(1.1)" }}
                   onError={(e) => {
                     const el = e.currentTarget;
-                    if (!el.dataset.fallbackTried) { el.dataset.fallbackTried = '1'; el.src = HOSTS_PUBLIC_ALT; return; }
-                    el.onerror = null; el.src = "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=1600&auto=format&fit=crop";
+                    if (!el.dataset.fallbackTried) {
+                      el.dataset.fallbackTried = "1";
+                      el.src = HOSTS_PUBLIC_ALT;
+                      return;
+                    }
+                    el.onerror = null;
+                    el.src = "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=1600&auto=format&fit=crop";
                   }}
                 />
-                {/* Edge glow (keeps subjects crisp) */}
                 <div className="edge-fringe absolute inset-0 rounded-3xl" />
-                {/* Subtle scanlines */}
                 <div className="scanlines absolute inset-0" />
                 <div className="absolute inset-0 bg-gradient-to-tr from-fuchsia-500/20 via-indigo-500/15 to-cyan-400/20 mix-blend-soft-light" />
                 <div className="pointer-events-none absolute inset-0 shadow-[inset_0_-120px_200px_rgba(0,0,0,0.45)]" />
@@ -290,25 +254,67 @@ export default function App() {
             </div>
           </div>
         </div>
-      </section><section id="join-the-list" className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pb-20">
+      </section>
+
+      {/* ===== Join the List (Mailchimp) ===== */}
+      <section id="join-the-list" className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pb-20">
         <div className="mx-auto max-w-3xl text-center py-10 md:py-14">
           <h3 className="text-3xl md:text-4xl font-extrabold tracking-[0.12em] uppercase">Join the List</h3>
           <p className="mt-3 text-zinc-300">Sign up for updates on the investigation and bonus content.</p>
 
-          <form className="mt-8 space-y-4 max-w-md mx-auto" onSubmit={handleJoin}>
-            <input type="text" placeholder="First Name" className="w-full rounded-md border border-white/15 bg-transparent px-4 py-3 text-base placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-white/20" value={firstName} onChange={(e)=>setFirstName(e.target.value)} />
-            <input type="text" placeholder="Last Name" className="w-full rounded-md border border-white/15 bg-transparent px-4 py-3 text-base placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-white/20" value={lastName} onChange={(e)=>setLastName(e.target.value)} />
-            <input type="email" placeholder="Email Address" className="w-full rounded-md border border-white/15 bg-transparent px-4 py-3 text-base placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-white/20" value={email} onChange={(e)=>setEmail(e.target.value)} required />
-            <button type="submit" disabled={loading} className="mx-auto inline-flex items-center justify-center rounded-full border-2 border-white bg-white px-8 py-3 font-semibold text-zinc-900 hover:bg-zinc-100 focus:outline-none focus:ring-2 focus:ring-white/30 disabled:opacity-60 disabled:cursor-not-allowed">{loading ? 'Joining…' : 'Sign Up'}</button>
-            {message && (
-              <p className={`text-sm ${message.type==='success' ? 'text-emerald-400' : 'text-rose-400'}`}>{message.text}</p>
-            )}
+          <form
+            action="https://crimesaladpodcast.us1.list-manage.com/subscribe/post?u=cc67224c1a30078239b64e0d3&id=466ab65f6a&f_id=00c2c3e1f0"
+            method="post"
+            target="_blank"
+            noValidate
+            className="mt-8 space-y-4 max-w-md mx-auto"
+          >
+            <label htmlFor="mce-EMAIL" className="sr-only">Email Address</label>
+            <input
+              type="email"
+              name="EMAIL"
+              id="mce-EMAIL"
+              required
+              placeholder="Email Address"
+              className="w-full rounded-md border border-white/15 bg-transparent px-4 py-3 text-base placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-white/20"
+            />
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <input
+                type="text"
+                name="FNAME"
+                id="mce-FNAME"
+                placeholder="First Name (optional)"
+                className="w-full rounded-md border border-white/15 bg-transparent px-4 py-3 text-base placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-white/20"
+              />
+              <input
+                type="text"
+                name="LNAME"
+                id="mce-LNAME"
+                placeholder="Last Name (optional)"
+                className="w-full rounded-md border border-white/15 bg-transparent px-4 py-3 text-base placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-white/20"
+              />
+            </div>
+
+            {/* Honeypot */}
+            <div style={{ position: "absolute", left: "-5000px" }} aria-hidden="true">
+              <input type="text" name="b_cc67224c1a30078239b64e0d3_466ab65f6a" tabIndex={-1} defaultValue="" />
+            </div>
+
+            <button
+              type="submit"
+              name="subscribe"
+              id="mc-embedded-subscribe"
+              className="mx-auto inline-flex items-center justify-center rounded-full border-2 border-white bg-white px-8 py-3 font-semibold text-zinc-900 hover:bg-zinc-100 focus:outline-none focus:ring-2 focus:ring-white/30"
+            >
+              Join the List
+            </button>
+
             <p className="text-xs text-zinc-500">We’ll never spam. Unsubscribe anytime.</p>
           </form>
         </div>
       </section>
 
-      {/* ===== Footer ===== */}
       {/* ===== Contact ===== */}
       <section id="contact" className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pb-20">
         <div className="p-[1px] rounded-3xl bg-gradient-to-br from-fuchsia-400/30 via-indigo-400/20 to-cyan-300/20">
@@ -320,7 +326,11 @@ export default function App() {
                 <svg viewBox="0 0 24 24" className="h-4 w-4" fill="currentColor" aria-hidden="true"><path d="M2 5.5A2.5 2.5 0 0 1 4.5 3h15A2.5 2.5 0 0 1 22 5.5v13a2.5 2.5 0 0 1-2.5 2.5h-15A2.5 2.5 0 0 1 2 18.5v-13Zm2.4-.5 7.6 5.4L19.6 5H4.4Zm15.1 2.2-6.8 4.9a1.5 1.5 0 0 1-1.8 0L4.1 7.2V18.5c0 .28.22.5.5.5h15a.5.5 0 0 0 .5-.5V7.2Z"/></svg>
                 Email {CONTACT_EMAIL}
               </a>
-              <button type="button" onClick={() => navigator.clipboard && navigator.clipboard.writeText(CONTACT_EMAIL)} className="inline-flex items-center gap-2 rounded-xl border border-white/15 bg-white/5 px-5 py-3 text-sm font-semibold hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/20">
+              <button
+                type="button"
+                onClick={() => navigator.clipboard && navigator.clipboard.writeText(CONTACT_EMAIL)}
+                className="inline-flex items-center gap-2 rounded-xl border border-white/15 bg-white/5 px-5 py-3 text-sm font-semibold hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/20"
+              >
                 Copy email
               </button>
             </div>
@@ -328,6 +338,7 @@ export default function App() {
         </div>
       </section>
 
+      {/* ===== Footer ===== */}
       <footer className="border-t border-white/10">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 grid md:grid-cols-4 gap-10 text-sm">
           <div className="md:col-span-2">
