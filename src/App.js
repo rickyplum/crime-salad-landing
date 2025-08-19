@@ -170,44 +170,7 @@ export default function App() {
   const [firstName, setFirstName] = useState("");
   const [lastName,  setLastName]  = useState("");
   const [email,     setEmail]     = useState("");
-  const [loading,   setLoading]   = useState(false);
-  const [message,   setMessage]   = useState(null);
 
-  // mailto submit handler
-  function handleJoin(e) {
-    e.preventDefault();
-    if (!email || !/@/.test(email)) {
-      setMessage({ type: "error", text: "Please enter a valid email." });
-      return;
-    }
-
-    setLoading(true);
-    setMessage(null);
-
-    try {
-      const subject = "Join the List signup";
-      const body = `Please add me to the list. Name: ${firstName} ${lastName} Email: ${email}`;
-      const mailto = `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-
-      // Trigger the user's email client
-      window.location.href = mailto;
-
-      setMessage({
-        type: "success",
-        text: `Opening your email app… if nothing opens, email us directly at ${CONTACT_EMAIL}.`,
-      });
-      setFirstName("");
-      setLastName("");
-      setEmail("");
-    } catch (err) {
-      setMessage({
-        type: "error",
-        text: `Could not open your mail app. Please email us directly at ${CONTACT_EMAIL}.`,
-      });
-    } finally {
-      setLoading(false);
-    }
-  }
 
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100 selection:bg-fuchsia-400/30">
@@ -220,49 +183,40 @@ export default function App() {
 
       {/* ===== Navbar ===== */}
       <header className="sticky top-0 z-40 border-b border-white/10 bg-zinc-950/70 backdrop-blur supports-[backdrop-filter]:bg-zinc-950/60">
-  <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 h-20 grid grid-cols-3 items-center">
-    {/* Left: Brand */}
-    <div className="flex items-center">
-      <span className="text-xl sm:text-2xl font-extrabold tracking-[0.18em] uppercase">
-        CRIME SALAD
-      </span>
-    </div>
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 h-20 grid grid-cols-3 items-center">
+          {/* Left: Brand (text logo, all caps) */}
+          <div className="flex items-center">
+            <span className="text-xl sm:text-2xl font-extrabold tracking-[0.18em] uppercase">CRIME SALAD</span>
+          </div>
 
-    {/* Center: Nav (desktop only) */}
-    <nav className="hidden md:flex justify-center items-center gap-8 text-sm text-zinc-300">
-      <a href="#join-the-list" className="hover:text-white">Join the List</a>
-      <a href="#shop" className="hover:text-white">Merch</a>
-      <a href={"mailto:" + CONTACT_EMAIL} className="hover:text-white">Contact</a>
-    </nav>
+          {/* Center: Nav */}
+          <nav className="hidden md:flex justify-center items-center gap-8 text-sm text-zinc-300">
+            {/* Removed Listen */}
+            <a href="#about" className="hover:text-white">About</a>
+            <a href="#shop" className="hover:text-white">Shop</a>
+            <a href="#join-the-list" className="hover:text-white">Join the List</a>
+            <a href={"mailto:" + CONTACT_EMAIL} className="hover:text-white">Contact</a>
+          </nav>
 
-    {/* Right: CTAs */}
-    <div className="flex justify-end items-center gap-3">
-      {/* Mobile Merch button (nav is hidden on mobile) */}
-      <a
-        href="#shop"
-        className="md:hidden inline-flex items-center gap-2 rounded-xl border border-white/15 bg-white/5 px-4 py-2 text-sm font-semibold hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/20"
-      >
-        Merch
-      </a>
-
-      <span className="hidden sm:inline text-sm text-zinc-300">Support us on</span>
-      <a
-        href={LINKS?.PATREON ?? "#"}
-        target="_blank"
-        rel="noopener noreferrer"
-        aria-label="Support us on Patreon"
-        className="inline-flex items-center gap-2 rounded-xl bg-[#ff424d] text-white px-4 py-2 text-sm font-semibold shadow-sm hover:brightness-110 focus:outline-none focus:ring-2 focus:ring-white/30"
-      >
-        <svg viewBox="0 0 24 24" className="h-4 w-4" aria-hidden="true" fill="currentColor">
-          <rect x="3" y="3" width="4" height="18" rx="1.2" />
-          <circle cx="16" cy="10" r="6" />
-        </svg>
-        Patreon
-      </a>
-    </div>
-  </div>
-</header>
-
+          {/* Right: Patreon button */}
+          <div className="flex justify-end items-center gap-3">
+            <span className="hidden sm:inline text-sm text-zinc-300">Support us on</span>
+            <a
+              href={LINKS?.PATREON ?? "#"}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Support us on Patreon"
+              className="inline-flex items-center gap-2 rounded-xl bg-[#ff424d] text-white px-4 py-2 text-sm font-semibold shadow-sm hover:brightness-110 focus:outline-none focus:ring-2 focus:ring-white/30"
+            >
+              <svg viewBox="0 0 24 24" className="h-4 w-4" aria-hidden="true" fill="currentColor">
+                <rect x="3" y="3" width="4" height="18" rx="1.2" />
+                <circle cx="16" cy="10" r="6" />
+              </svg>
+              Patreon
+            </a>
+          </div>
+        </div>
+      </header>
 
       {/* ===== Global styles for flicker/glint + hero line fade ===== */}
       <style>{`
@@ -441,54 +395,8 @@ export default function App() {
             </div>
           </div>
         </div>
-      </section><section id="join-the-list" className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pb-20">
-  <div className="p-[1px] rounded-3xl bg-gradient-to-br from-fuchsia-400/30 via-indigo-400/20 to-cyan-300/20">
-    <div className="rounded-3xl bg-zinc-950/70 p-8 md:p-12 border border-white/10">
-      <h3 className="text-2xl sm:text-3xl font-bold text-center">Join the List</h3>
-      <p className="mt-2 text-zinc-300 max-w-xl mx-auto text-center">No spam. Just new episodes, behind‑the‑scenes, and ways to support families and advocacy.</p>
+      </section>
 
-      <form
-        className="mt-6 mx-auto grid w-full max-w-xl grid-cols-1 gap-3 sm:grid-cols-[1fr_1fr_auto]"
-        action="https://crimesaladpodcast.us1.list-manage.com/subscribe/post?u=cc67224c1a30078239b64e0d3&id=466ab65f6a&f_id=00c2c3e1f0"
-        method="post"
-        target="_blank"
-        noValidate
-      >
-        <label className="sr-only" htmlFor="mce-FNAME">First name</label>
-        <input
-          type="text"
-          name="FNAME"
-          id="mce-FNAME"
-          placeholder="First name (optional)"
-          className="rounded-xl border border-white/10 bg-zinc-900/80 px-4 py-3 text-sm placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-white/20"
-        />
-
-        <label className="sr-only" htmlFor="mce-EMAIL">Email address</label>
-        <input
-          type="email"
-          name="EMAIL"
-          id="mce-EMAIL"
-          required
-          placeholder="Email address"
-          className="rounded-xl border border-white/10 bg-zinc-900/80 px-4 py-3 text-sm placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-white/20"
-        />
-
-        <div className="sm:col-span-1">
-          <button type="submit" name="subscribe" className="rounded-xl bg-white text-zinc-900 px-5 py-3 text-sm font-semibold hover:bg-zinc-200 transition w-full sm:w-auto">
-            Join the List
-          </button>
-        </div>
-
-        {/* Mailchimp honeypot (required) */}
-        <div aria-hidden="true" style={{ position: 'absolute', left: '-5000px' }}>
-          <input type="text" name="b_cc67224c1a30078239b64e0d3_466ab65f6a" tabIndex={-1} defaultValue="" />
-        </div>
-      </form>
-
-      <p className="mt-3 text-xs text-zinc-400 text-center">By subscribing you agree to our terms. Unsubscribe anytime.</p>
-    </div>
-  </div>
-</section>
       {/* ===== Shop ===== */}
       <section id="shop" className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16">
         <h3 className="text-2xl sm:text-3xl font-bold mb-6">Shop</h3>
@@ -499,6 +407,56 @@ export default function App() {
           storefrontAccessToken={process.env.REACT_APP_SHOPIFY_STOREFRONT_TOKEN || "899809aa74e2ecbe671f60a376ef7932"}
           collectionId="gid://shopify/Collection/499090194713"
         />
+      </section>
+
+      {/* ===== Join the List ===== */}
+      <section id="join-the-list" className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pb-20">
+        <div className="p-[1px] rounded-3xl bg-gradient-to-br from-fuchsia-400/30 via-indigo-400/20 to-cyan-300/20">
+          <div className="rounded-3xl bg-zinc-950/70 p-8 md:p-12 border border-white/10">
+            <h3 className="text-2xl sm:text-3xl font-bold text-center">Join the List</h3>
+            <p className="mt-2 text-zinc-300 max-w-xl mx-auto text-center">No spam. Just new episodes, behind‑the‑scenes, and ways to support families and advocacy.</p>
+
+            <form
+              className="mt-6 mx-auto grid w-full max-w-xl grid-cols-1 gap-3 sm:grid-cols-[1fr_1fr_auto]"
+              action="https://crimesaladpodcast.us1.list-manage.com/subscribe/post?u=cc67224c1a30078239b64e0d3&id=466ab65f6a&f_id=00c2c3e1f0"
+              method="post"
+              target="_blank"
+              noValidate
+            >
+              <label className="sr-only" htmlFor="mce-FNAME">First name</label>
+              <input
+                type="text"
+                name="FNAME"
+                id="mce-FNAME"
+                placeholder="First name (optional)"
+                className="rounded-xl border border-white/10 bg-zinc-900/80 px-4 py-3 text-sm placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-white/20"
+              />
+
+              <label className="sr-only" htmlFor="mce-EMAIL">Email address</label>
+              <input
+                type="email"
+                name="EMAIL"
+                id="mce-EMAIL"
+                required
+                placeholder="Email address"
+                className="rounded-xl border border-white/10 bg-zinc-900/80 px-4 py-3 text-sm placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-white/20"
+              />
+
+              <div className="sm:col-span-1">
+                <button type="submit" name="subscribe" className="rounded-xl bg-white text-zinc-900 px-5 py-3 text-sm font-semibold hover:bg-zinc-200 transition w-full sm:w-auto">
+                  Join the List
+                </button>
+              </div>
+
+              {/* Mailchimp honeypot (required) */}
+              <div aria-hidden="true" style={{ position: 'absolute', left: '-5000px' }}>
+                <input type="text" name="b_cc67224c1a30078239b64e0d3_466ab65f6a" tabIndex={-1} defaultValue="" />
+              </div>
+            </form>
+
+            <p className="mt-3 text-xs text-zinc-400 text-center">By subscribing you agree to our terms. Unsubscribe anytime.</p>
+          </div>
+        </div>
       </section>
 
       {/* ===== Footer ===== */}
