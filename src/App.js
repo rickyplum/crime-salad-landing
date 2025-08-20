@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 
 // Crime Salad — Clean, Fancy + Spotify Embed + Press Marquee + Flickering Art (CRA + Tailwind)
 // Paste this whole file into src/App.js
@@ -191,12 +191,11 @@ export default function App() {
 
           {/* Center: Nav */}
           <nav className="hidden md:flex justify-center items-center gap-8 text-sm text-zinc-300">
-            {/* Removed Listen */}
-            <a href="#about" className="hover:text-white">About</a>
-            <a href="#shop" className="hover:text-white">Shop</a>
-            <a href="#join-the-list" className="hover:text-white">Join the List</a>
-            <a href={"mailto:" + CONTACT_EMAIL} className="hover:text-white">Contact</a>
-          </nav>
+  <a href="#about" className="hover:text-white">About</a>
+  <a href="#shop" className="hover:text-white">Shop</a>
+  <a href="#join-the-list" className="hover:text-white">Join the List</a>
+  <a href="#contact" className="hover:text-white">Contact</a>
+</nav>
 
           {/* Right: Patreon button */}
           <div className="flex justify-end items-center gap-3">
@@ -219,7 +218,8 @@ export default function App() {
       </header>
 
       {/* ===== Global styles for flicker/glint + hero line fade ===== */}
-      <style>{`
+      <style>{`html { scroll-behavior: smooth; }
+
         @keyframes flicker {
           0%{opacity:.9;filter:brightness(1.05)}2%{opacity:.15;filter:brightness(.9)}
           3%{opacity:.85}5%{opacity:.25}7%{opacity:.8}8%{opacity:.3}
@@ -461,7 +461,7 @@ export default function App() {
 
       {/* ===== Footer ===== */}
       {/* ===== Contact ===== */}
-      <section id="contact" className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pb-20">
+      <section id="contact" className="scroll-mt-24 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pb-20">
         <div className="p-[1px] rounded-3xl bg-gradient-to-br from-fuchsia-400/30 via-indigo-400/20 to-cyan-300/20">
           <div className="rounded-3xl bg-zinc-950/70 p-8 md:p-12 text-center border border-white/10">
             <h3 className="text-2xl sm:text-3xl font-bold">Contact</h3>
