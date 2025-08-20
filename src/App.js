@@ -193,9 +193,10 @@ export default function App() {
           <nav className="hidden md:flex justify-center items-center gap-8 text-sm text-zinc-300">
   <a href="#about" className="hover:text-white">About</a>
   <a href="#shop" className="hover:text-white">Shop</a>
-  <a href="#join-the-list" className="hover:text-white">Join the List</a>
+  <a href="#join-the-newsletter" className="hover:text-white">Join the newsletter</a>
   <a href="#contact" className="hover:text-white">Contact</a>
 </nav>
+
 
           {/* Right: Patreon button */}
           <div className="flex justify-end items-center gap-3">
@@ -410,49 +411,67 @@ export default function App() {
       </section>
 
       {/* ===== Join the List ===== */}
-      <section id="join-the-list" className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pb-20">
+      <section id="join-the-newsletter" className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pb-20">
         <div className="p-[1px] rounded-3xl bg-gradient-to-br from-fuchsia-400/30 via-indigo-400/20 to-cyan-300/20">
           <div className="rounded-3xl bg-zinc-950/70 p-8 md:p-12 border border-white/10">
-            <h3 className="text-2xl sm:text-3xl font-bold text-center">Join the List</h3>
+            <h3 className="text-2xl sm:text-3xl font-bold text-center">Join the newsletter</h3>
             <p className="mt-2 text-zinc-300 max-w-xl mx-auto text-center">No spam. Just new episodes, behind‑the‑scenes, and ways to support families and advocacy.</p>
 
             <form
-              className="mt-6 mx-auto grid w-full max-w-xl grid-cols-1 gap-3 sm:grid-cols-[1fr_1fr_auto]"
-              action="https://crimesaladpodcast.us1.list-manage.com/subscribe/post?u=cc67224c1a30078239b64e0d3&id=466ab65f6a&f_id=00c2c3e1f0"
-              method="post"
-              target="_blank"
-              noValidate
-            >
-              <label className="sr-only" htmlFor="mce-FNAME">First name</label>
-              <input
-                type="text"
-                name="FNAME"
-                id="mce-FNAME"
-                placeholder="First name (optional)"
-                className="rounded-xl border border-white/10 bg-zinc-900/80 px-4 py-3 text-sm placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-white/20"
-              />
+  className="mt-6 mx-auto grid w-full max-w-3xl grid-cols-1 gap-3 sm:grid-cols-[1fr_1fr_1fr_auto]"
+  action="https://crimesaladpodcast.us1.list-manage.com/subscribe/post?u=cc67224c1a30078239b64e0d3&id=466ab65f6a&f_id=00c2c3e1f0"
+  method="post"
+  target="_blank"
+  noValidate
+>
+  {/* First name */}
+  <label className="sr-only" htmlFor="mce-FNAME">First name</label>
+  <input
+    type="text"
+    name="FNAME"
+    id="mce-FNAME"
+    placeholder="First name (optional)"
+    className="h-10 rounded-lg border border-white/10 bg-zinc-900/80 px-3 text-sm placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-white/20"
+  />
 
-              <label className="sr-only" htmlFor="mce-EMAIL">Email address</label>
-              <input
-                type="email"
-                name="EMAIL"
-                id="mce-EMAIL"
-                required
-                placeholder="Email address"
-                className="rounded-xl border border-white/10 bg-zinc-900/80 px-4 py-3 text-sm placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-white/20"
-              />
+  {/* Phone (optional) — make sure your Mailchimp audience has a PHONE text field */}
+  <label className="sr-only" htmlFor="mce-PHONE">Phone</label>
+  <input
+    type="text"
+    name="PHONE"
+    id="mce-PHONE"
+    placeholder="Phone (optional)"
+    className="h-10 rounded-lg border border-white/10 bg-zinc-900/80 px-3 text-sm placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-white/20"
+  />
 
-              <div className="sm:col-span-1">
-                <button type="submit" name="subscribe" className="rounded-xl bg-white text-zinc-900 px-5 py-3 text-sm font-semibold hover:bg-zinc-200 transition w-full sm:w-auto">
-                  Join the List
-                </button>
-              </div>
+  {/* Email */}
+  <label className="sr-only" htmlFor="mce-EMAIL">Email address</label>
+  <input
+    type="email"
+    name="EMAIL"
+    id="mce-EMAIL"
+    required
+    placeholder="Email address"
+    className="h-10 rounded-lg border border-white/10 bg-zinc-900/80 px-3 text-sm placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-white/20"
+  />
 
-              {/* Mailchimp honeypot (required) */}
-              <div aria-hidden="true" style={{ position: 'absolute', left: '-5000px' }}>
-                <input type="text" name="b_cc67224c1a30078239b64e0d3_466ab65f6a" tabIndex={-1} defaultValue="" />
-              </div>
-            </form>
+  {/* Submit */}
+  <div className="sm:col-span-1">
+    <button
+      type="submit"
+      name="subscribe"
+      className="h-10 rounded-lg bg-white text-zinc-900 px-4 text-sm font-semibold hover:bg-zinc-200 transition w-full sm:w-auto"
+    >
+      Join the newsletter
+    </button>
+  </div>
+
+  {/* Mailchimp honeypot (required) */}
+  <div aria-hidden="true" style={{ position: 'absolute', left: '-5000px' }}>
+    <input type="text" name="b_cc67224c1a30078239b64e0d3_466ab65f6a" tabIndex={-1} defaultValue="" />
+  </div>
+</form>
+
 
             <p className="mt-3 text-xs text-zinc-400 text-center">By subscribing you agree to our terms. Unsubscribe anytime.</p>
           </div>
